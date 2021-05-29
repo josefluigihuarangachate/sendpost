@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "789395890444",
+    "project_id": "sendpost-ee178",
+    "storage_bucket": "sendpost-ee178.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:789395890444:android:e067e52a205dfb7f9f6929",
+        "android_client_info": {
+          "package_name": "com.sendpost.sendpost"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "789395890444-gph2eg13eoocm3umpk5uebrj0qrer4og.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC66ZmSS12-gmCih79qnKe5RYTwZYWtUIs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "789395890444-gph2eg13eoocm3umpk5uebrj0qrer4og.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
