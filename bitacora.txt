@@ -1,4 +1,10 @@
 LINK : https://www.freecodecamp.org/espanol/news/subir-a-github-lo-suficientemente-simple-para-poetas/
 
+// compartir carpeta de windows a mac
+https://www.solvetic.com/tutoriales/article/3207-compartir-conectar-carpetas-en-red-mac-windows-10/
+
+// TOKEN DEL GITHUB - SENDPOST
+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
+
 // SUBIR LOS CAMBIO A GITHUB
 git push origin master
