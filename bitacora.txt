@@ -8,3 +8,20 @@ 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
 
 // SUBIR LOS CAMBIO A GITHUB
 git push origin master
+
+// ERROR
+// Error: Cannot run with sound null safety, because the following dependencies
+//   don't support null safety:
+//    - package:firebase_core
+//    - package:firebase_core_platform_interface
+//    - package:quiver
+//    - package:plugin_platform_interface
+
+Agregar al inicio : // @dart=2.9
+
+CMD (Si no funciona agregando // @dart=2.9):
+- flutter run --no-sound-null-safety
+- flutter run -d chrome --no-sound-null-safety
+
+
+- flutter pub get

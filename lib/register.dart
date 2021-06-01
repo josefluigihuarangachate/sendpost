@@ -1,8 +1,10 @@
 // @dart=2.9
+import 'package:sendpost/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/services.dart.';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:toast/toast.dart';
@@ -17,28 +19,59 @@ import 'register.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(Register());
 }
 
 void errorDialog(context, msg) {
   // Example : https://pub.dev/packages/flutter_dialogs/example
-  try{
-    showPlatformDialog(
-      context: context,
-      builder: (_) => BasicDialogAlert(
-        title: Text("Mensaje Importante"),
-        content: Text(msg),
-        actions: <Widget>[
-          BasicDialogAction(
-            title: Text("Volver Intentar"),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }catch (e) {
+  try {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Mensaje Importante'),
+            content: Text(msg),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Volver Intentar'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  //Navigator.push(context,
+                  //    MaterialPageRoute(builder: (context) => Register()));
+                  //Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
+  } catch (e) {
+    print(e);
+  }
+}
+
+void okDialog(context, msg) {
+  // Example : https://pub.dev/packages/flutter_dialogs/example
+  try {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Mensaje Importante'),
+            content: Text(msg),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Aceptar'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  //Navigator.push(context,
+                  //    MaterialPageRoute(builder: (context) => Register()));
+                  //Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
+  } catch (e) {
     print(e);
   }
 }
@@ -48,7 +81,7 @@ void errorDialog(context, msg) {
 String logo = 'assets/images/logo.png';
 var apirest = "http://192.168.0.105:81";
 
-class MyApp extends StatelessWidget {
+class Register extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -70,6 +103,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
   // Crea un controlador de texto. Lo usaremos para recuperar el valor actual
   // del TextField!
   final myController = TextEditingController();
+
+  final nombres = TextEditingController();
+  final correo = TextEditingController();
   final usuario = TextEditingController();
   final password = TextEditingController();
 
@@ -78,6 +114,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
     super.initState();
 
     myController.addListener(_printLatestValue);
+    nombres.addListener(_printLatestValue);
+    correo.addListener(_printLatestValue);
     usuario.addListener(_printLatestValue);
     password.addListener(_printLatestValue);
   }
@@ -87,6 +125,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
     // Limpia el controlador cuando el widget se elimine del árbol de widgets
     // Esto también elimina el listener _printLatestValue
     myController.dispose();
+    nombres.dispose();
+    correo.dispose();
     usuario.dispose();
     password.dispose();
     super.dispose();
@@ -122,7 +162,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
               ),
               Container(
                 child: const Text(
-                  'Bienvenido!',
+                  'Registrate Ahora',
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -131,11 +171,90 @@ class _MyCustomFormState extends State<MyCustomForm> {
               ),
               Container(
                 child: const Text(
-                  'Ingrese con tu cuenta',
+                  'Crear una nueva cuenta',
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                       fontWeight: FontWeight.normal, fontSize: 12),
+                ),
+              ),
+              Container(
+                child: const Text(
+                  '\n',
+                ),
+              ),
+              Container(
+                child: TextField(
+                  // https://es.coredump.biz/questions/49238908/flutter-textfield-value-always-uppercase-amp-debounce#60174563
+                  textCapitalization: TextCapitalization.words,
+                  controller: nombres,
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    color: Color(0x0ffaa109e),
+                  ),
+                  decoration: const InputDecoration(
+                    //labelText: 'USUARIO',
+                    contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                    // prefixIcon: Icon(Icons.account_circle_outlined),
+                    prefixIcon: Icon(
+                      Icons.credit_card_outlined,
+                    ),
+                    hintText: "Nombres Completos",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    //hintText: 'Ingrese un usuario',
+                    // Default Color underline
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black26),
+                    ),
+                    // Focus Color underline
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0x0fffc00f8e)),
+                    ),
+                  ),
+                  onChanged: (valor) {
+                    //var val = usuario.text;
+                    //print("Usuario: " + usuario.text);
+                  },
+                ),
+              ),
+              Container(
+                child: const Text(
+                  '\n',
+                ),
+              ),
+              Container(
+                child: TextField(
+                  inputFormatters: [
+                    BlacklistingTextInputFormatter(RegExp(r"\s"))
+                  ],
+                  controller: correo,
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    color: Color(0x0ffaa109e),
+                  ),
+                  decoration: const InputDecoration(
+                    //labelText: 'USUARIO',
+                    contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                    // prefixIcon: Icon(Icons.account_circle_outlined),
+                    prefixIcon: Icon(
+                      Icons.alternate_email,
+                    ),
+                    hintText: "Correo Electronico",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    //hintText: 'Ingrese un usuario',
+                    // Default Color underline
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black26),
+                    ),
+                    // Focus Color underline
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0x0fffc00f8e)),
+                    ),
+                  ),
+                  onChanged: (valor) {
+                    //var val = usuario.text;
+                    //print("Usuario: " + usuario.text);
+                  },
                 ),
               ),
               Container(
@@ -219,14 +338,14 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     onPressed: () => {this.fetchData()},
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50)),
-                    child: Text('INICIAR SESION'),
+                    child: Text('REGISTRARME'),
                     textColor: Colors.white,
                     color: Color(0xffaa109e),
                     padding: EdgeInsets.fromLTRB(84, 17, 84, 17),
                   )),
               Container(
                 padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                child: Text('-------- Registrate es gratis --------',
+                child: Text('-------- Ya tengo una cuenta --------',
                     style: TextStyle(fontSize: 16)),
               ),
               Container(
@@ -234,12 +353,20 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   margin: const EdgeInsets.fromLTRB(0, 40, 0, 0),
                   child: RaisedButton(
                     onPressed: () => {
-                    Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Register()))
+                      //Navigator.push(context,
+                      //    MaterialPageRoute(builder: (context) => MyApp()))
+
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MyApp();
+                          },
+                        ),
+                      )
                     },
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50)),
-                    child: Text('REGISTRATE AQUI'),
+                    child: Text('INICIAR SESION'),
                     textColor: Colors.white,
                     // Ejm: Color(0xff"TU COLOR HEX")
                     color: Color(0xffea0c70),
@@ -255,31 +382,52 @@ class _MyCustomFormState extends State<MyCustomForm> {
   Future<Post> fetchData() async {
     //final response = await http.post("http://localhost:8000/login");
 
+    var txtnombres = nombres.text;
+    var txtcorreo = correo.text;
     var txtuser = usuario.text;
     var txtpassword = password.text;
 
-    if (txtuser.trim() != '' && txtpassword.trim() != '') {
-      // https://medium.com/@ekosuprastyo15/flutter-json-array-parse-of-objects-dbf36a7aa08d
-      var response = await http.get(
-          Uri.parse(apirest + "/login" + "/" + txtuser + "/" + txtpassword));
+    if (txtnombres.trim() != '' &&
+        txtcorreo.trim() != '' &&
+        txtuser.trim() != '' &&
+        txtpassword.trim() != '') {
+      var response = await http.get(Uri.parse(apirest +
+          "/register" +
+          "/" +
+          txtnombres +
+          "/" +
+          txtcorreo +
+          "/" +
+          txtuser +
+          "/" +
+          txtpassword));
 
       final data = jsonDecode(response.body);
+
       if (data['status'] == 'Ok') {
-        Fluttertoast.showToast(
-            msg: "Bienvenido a SendPost",
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color(0x0ffc00f8e),
-            textColor: Color(0x0ffffffff),
-            fontSize: 16.0);
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Perfil()));
-      } else {
+        okDialog(context, data['msg']);
+
+        // Registro los datos en firebase
+        
+        // Fin Registro los datos en firebase
+
+        // Limpio los inputs y las variables de los inputs
+        txtnombres = "";
+        txtcorreo = "";
+        txtuser = "";
+        txtpassword = "";
+        nombres.text = "";
+        correo.text = "";
+        usuario.text = "";
+        password.text = "";
+
+      } else if (data['status'] == 'Error') {
+        //print(data['status']);
         errorDialog(context, data['msg']);
       }
-      //print(data['data']);
-
-      //errorDialog(context, response.body);
+      /*else {
+        errorDialog(context, data['msg']);
+      }*/
     } else {
       errorDialog(context, "No debe haber campos vacios");
     }
@@ -313,7 +461,6 @@ class Post {
     );
   }
 }
-
 
 final ButtonStyle flatButtonStyle = TextButton.styleFrom(
   primary: Colors.black87,
