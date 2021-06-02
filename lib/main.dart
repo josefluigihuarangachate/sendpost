@@ -13,11 +13,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'perfil.dart';
 import 'register.dart';
+import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(
+      MyApp()
+  );
 }
 
 void errorDialog(context, msg) {
@@ -265,6 +272,15 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
       final data = jsonDecode(response.body);
       if (data['status'] == 'Ok') {
+
+        // Actualizar datos de logueo Firebase
+        var firebaseUser =  FirebaseAuth.instance.currentUser;
+        FirebaseFirestore.instance.collection("contactos").doc(data['data']['fb_uid'].toString()).set({
+          "online": 1
+        }, SetOptions(merge: true));
+
+        // Fin Actualizar datos de logueo Firebase
+
         Fluttertoast.showToast(
             msg: "Bienvenido a SendPost",
             gravity: ToastGravity.BOTTOM,

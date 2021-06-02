@@ -3,8 +3,9 @@ import 'package:sendpost/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/services.dart.';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:toast/toast.dart';
@@ -15,6 +16,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'perfil.dart';
 import 'register.dart';
+
+FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -391,25 +394,31 @@ class _MyCustomFormState extends State<MyCustomForm> {
         txtcorreo.trim() != '' &&
         txtuser.trim() != '' &&
         txtpassword.trim() != '') {
-      var response = await http.get(Uri.parse(apirest +
-          "/register" +
-          "/" +
-          txtnombres +
-          "/" +
-          txtcorreo +
-          "/" +
-          txtuser +
-          "/" +
-          txtpassword));
-
+      var response = await http.get(Uri.parse(apirest + "/register" + "/" + txtnombres + "/" + txtcorreo + "/" + txtuser + "/" + txtpassword));
       final data = jsonDecode(response.body);
 
       if (data['status'] == 'Ok') {
+        // Registro los datos en firebase
+        // https://www.geeksforgeeks.org/flutter-read-and-write-data-on-firebase/
+
         okDialog(context, data['msg']);
 
-        // Registro los datos en firebase
-        
+        var IDUSERSP = data['data']['idUser'].toString();
+        DocumentReference docRef =
+            await FirebaseFirestore.instance.collection('contactos').add({
+          'usuario': txtuser,
+          'correo': txtcorreo,
+          'estado': 'activo',
+          'id': data['data']['idUser'],
+          'nombre': txtnombres,
+          'online': 0,
+        });
         // Fin Registro los datos en firebase
+
+        // OBTENGO EL UID DEL REGISTRO
+        // https://stackoverflow.com/a/51056621
+        String UIDFB = docRef.id;
+        // FIN OBTENGO EL UID DEL REGISTRO
 
         // Limpio los inputs y las variables de los inputs
         txtnombres = "";
@@ -421,13 +430,15 @@ class _MyCustomFormState extends State<MyCustomForm> {
         usuario.text = "";
         password.text = "";
 
+        // REGISTRO Y ACTUALIZO EL UID DEL USUARIO - PONER ULTIMO YA QUE HAY CRUCE
+
+        var responseuid = await http.get(Uri.parse(apirest + "/updateuid" + "/" + UIDFB + "/" + IDUSERSP));
+        final datauid = jsonDecode(responseuid.body);
+        // FIN REGISTRO Y ACTUALIZO EL UID DEL USUARIO - PONER ULTIMO YA QUE HAY CRUCE
+
       } else if (data['status'] == 'Error') {
-        //print(data['status']);
         errorDialog(context, data['msg']);
       }
-      /*else {
-        errorDialog(context, data['msg']);
-      }*/
     } else {
       errorDialog(context, "No debe haber campos vacios");
     }
