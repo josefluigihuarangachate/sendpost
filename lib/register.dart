@@ -405,7 +405,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
         var IDUSERSP = data['data']['idUser'].toString();
         DocumentReference docRef =
-            await FirebaseFirestore.instance.collection('contactos').add({
+            await FirebaseFirestore.instance.collection('usuarios').add({
           'usuario': txtuser,
           'correo': txtcorreo,
           'estado': 'activo',
@@ -481,3 +481,4 @@ final ButtonStyle flatButtonStyle = TextButton.styleFrom(
     borderRadius: BorderRadius.all(Radius.circular(2.0)),
   ),
 );
+

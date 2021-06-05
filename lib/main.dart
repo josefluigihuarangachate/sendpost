@@ -16,20 +16,19 @@ import 'register.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(
-      MyApp()
-  );
+  runApp(MyApp());
 }
 
 void errorDialog(context, msg) {
   // Example : https://pub.dev/packages/flutter_dialogs/example
-  try{
+  try {
     showPlatformDialog(
       context: context,
       builder: (_) => BasicDialogAlert(
@@ -45,13 +44,17 @@ void errorDialog(context, msg) {
         ],
       ),
     );
-  }catch (e) {
+  } catch (e) {
     print(e);
   }
 }
 
 // Poner imagen en flutter
 // Ejm : https://www.youtube.com/watch?v=Hxh6nNHSUjo
+
+// Emj : Mantener la sesion iniciada
+// https://es.stackoverflow.com/a/258365
+
 String logo = 'assets/images/logo.png';
 var apirest = "http://192.168.0.105:81";
 
@@ -103,8 +106,21 @@ class _MyCustomFormState extends State<MyCustomForm> {
     //print("Second text field: ${myController.text}");
   }
 
+  bool isChecked = false;
   @override
   Widget build(BuildContext context) {
+    Color getColor(Set<MaterialState> states) {
+      const Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if (states.any(interactiveStates.contains)) {
+        return Color(0x0ffae57c9);
+      }
+      return Color(0x0ffaa109e);
+    }
+
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(30.0),
@@ -219,9 +235,47 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   controller: password,
                 ),
               ),
+
+              // CHECKBOX
+              Container(
+                  margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Checkbox(
+                            checkColor: Colors.white,
+                            fillColor:
+                                MaterialStateProperty.resolveWith(getColor),
+                            value: isChecked,
+                            onChanged: (bool value) {
+                              setState(() {
+                                if (value == true) {
+                                  value = false;
+                                } else if (value == false) {
+                                  value = true;
+                                }
+                                isChecked = !value;
+
+                                print("El estado de recordar contraseña es : " +
+                                    isChecked.toString());
+                              });
+                            },
+                          ),
+                          Text(
+                            'Recordar contraseña',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 17.0),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
+              // FIN CHECKBOX
+
               Container(
                   //-----------------------------------//TOP
-                  margin: const EdgeInsets.fromLTRB(0, 40, 0, 0),
+                  margin: const EdgeInsets.fromLTRB(0, 22, 0, 0),
                   child: RaisedButton(
                     onPressed: () => {this.fetchData()},
                     shape: RoundedRectangleBorder(
@@ -241,8 +295,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   margin: const EdgeInsets.fromLTRB(0, 40, 0, 0),
                   child: RaisedButton(
                     onPressed: () => {
-                    Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Register()))
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Register()))
                     },
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50)),
@@ -272,12 +326,12 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
       final data = jsonDecode(response.body);
       if (data['status'] == 'Ok') {
-
         // Actualizar datos de logueo Firebase
-        var firebaseUser =  FirebaseAuth.instance.currentUser;
-        FirebaseFirestore.instance.collection("contactos").doc(data['data']['fb_uid'].toString()).set({
-          "online": 1
-        }, SetOptions(merge: true));
+        var firebaseUser = FirebaseAuth.instance.currentUser;
+        FirebaseFirestore.instance
+            .collection("usuarios")
+            .doc(data['data']['fb_uid'].toString())
+            .set({"online": 1}, SetOptions(merge: true));
 
         // Fin Actualizar datos de logueo Firebase
 
@@ -329,7 +383,6 @@ class Post {
     );
   }
 }
-
 
 final ButtonStyle flatButtonStyle = TextButton.styleFrom(
   primary: Colors.black87,

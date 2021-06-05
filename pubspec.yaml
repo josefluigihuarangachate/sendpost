@@ -38,7 +38,13 @@ dependencies:
   toast: ^0.1.5 # PARA USAR TOAST
   fluttertoast: ^8.0.7
   flutter_dialogs: ^1.1.0
+  shared_preferences: ^2.0.6
+  #flutter_localizations:
+  #  sdk: flutter
+  path_provider: ^2.0.2
 
+#dependency_overrides:
+#  intl: any
 
 dev_dependencies:
   flutter_test:

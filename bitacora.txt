@@ -22,6 +22,8 @@ Agregar al inicio : // @dart=2.9
 CMD (Si no funciona agregando // @dart=2.9):
 - flutter run --no-sound-null-safety
 - flutter run -d chrome --no-sound-null-safety
-
-
+- flutter upgrade
+- flutter clean
+- flutter doctor
 - flutter pub get
+- flutter pub deps -- --style=compact
