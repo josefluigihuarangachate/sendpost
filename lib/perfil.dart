@@ -18,14 +18,16 @@ import 'perfil.dart';
 import 'register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Logout Ejm : https://stackoverflow.com/a/63162551
 // EJM TABS BOTTOM: https://stackoverflow.com/a/51825203
+// AppBar Poner imagen : https://stackoverflow.com/a/53857335
+String logo = 'assets/images/sendpost-texto-blanco.png';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(Perfil());
 }
-
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -39,7 +41,20 @@ class Perfil extends StatelessWidget {
           appBar: AppBar(
             centerTitle: true,
             backgroundColor: Color(0xFFaa109e),
-            title: Text("SendPost"),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  logo,
+                  fit: BoxFit.contain,
+                  height: 20,
+                ),
+                //Container(
+                //    padding: const EdgeInsets.all(8.0), child: Text('YourAppTitle')
+                //    )
+              ],
+            ),
+            //title: Text("SendPost"),
           ),
           bottomNavigationBar: menu(),
           body: TabBarView(
@@ -64,20 +79,35 @@ class Perfil extends StatelessWidget {
                         child: new ListTile(
                           contentPadding: EdgeInsets.fromLTRB(10, 12, 12, 10),
                           leading: IconButton(
+                            icon: Icon(Icons.verified_user),
+                            onPressed: () => print('select'),
+                          ),
+                          title: Text('Configuradión de mis datos'),
+                          subtitle: Text(
+                              'Configuración general de tu cuenta de sendpost',
+                              style: TextStyle(fontSize: 12)),
+                          //trailing: Icon(
+                          //  Icons.arrow_forward_ios,
+                          //),
+                          onTap: () => print('Precionaste Configuracion'),
+                        )),
+                    Card(
+                        margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                        child: new ListTile(
+                          contentPadding: EdgeInsets.fromLTRB(10, 12, 12, 10),
+                          leading: IconButton(
                             icon: Icon(Icons.help),
                             onPressed: () => print('select'),
                           ),
                           title: Text('Ayuda'),
                           subtitle: Text(
                               'Centro de ayuda, contáctanos, politica de privacidad',
-                              style: TextStyle(fontSize: 12)
-                          ),
+                              style: TextStyle(fontSize: 12)),
                           //trailing: Icon(
                           //  Icons.arrow_forward_ios,
                           //),
                           onTap: () => print('Precionaste Ayuda'),
-                        )
-                    ),
+                        )),
                     Card(
                         margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
                         child: new ListTile(
@@ -89,19 +119,19 @@ class Perfil extends StatelessWidget {
                           title: Text('Cerrar Sesión'),
                           subtitle: Text(
                               'Salir de la aplicacion para luego volver a ingresar',
-                              style: TextStyle(fontSize: 12)
-                          ),
+                              style: TextStyle(fontSize: 12)),
                           //trailing: Icon(
                           //  Icons.arrow_forward_ios,
                           //),
                           onTap: () {
-
                             // Logout Ejm : https://stackoverflow.com/a/63162551
-                            Navigator.pushAndRemoveUntil(context,
-                                MaterialPageRoute(builder: (context) => MyApp()), (r) => false);
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MyApp()),
+                                (r) => false);
                           },
-                        )
-                    ),
+                        )),
                   ],
                 ),
               ),
@@ -131,7 +161,7 @@ class Perfil extends StatelessWidget {
             icon: Icon(Icons.tag_faces),
           ),
           Tab(
-            text: "Cumpleaños",
+            text: "Especial",
             icon: Icon(Icons.cake),
           ),
           Tab(
