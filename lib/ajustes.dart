@@ -1,85 +1,81 @@
-// @dart=2.9
-import 'package:sendpost/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/services.dart.';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'dart:convert';
-import 'dart:async';
-import 'package:toast/toast.dart';
-import 'package:http/http.dart' as http;
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_dialogs/flutter_dialogs.dart';
-import 'perfil.dart';
-import 'register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(Ajustes());
+
 class Ajustes extends StatelessWidget {
+  // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: DefaultTabController(
-        length: 4,
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            backgroundColor: Color(0xFFaa109e),
-            title: Text("Ajustes"),
-          ),
-          bottomNavigationBar: menu(),
-          body: TabBarView(
-            children: [
-              Container(
-                  child: Icon(Icons.directions_car)
-              ),
-              Container(
-                  child: Icon(Icons.directions_transit)
-              ),
-              Container(
-                  child: Icon(Icons.directions_bike)
-              ),
-              Container(
-                  child: Icon(Icons.directions_bike)
-              ),
-            ],
-          ),
-        ),
+      title: 'Shared preferences demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: MyHomePage(title: 'Shared preferences demo'),
     );
   }
+}
 
-  Widget menu() {
-    return Container(
-      color: Color(0xFFaa109e),
-      child: TabBar(
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white70,
-        indicatorSize: TabBarIndicatorSize.tab,
-        indicatorPadding: EdgeInsets.all(5.0),
-        indicatorColor: Color(0xffffffff),
-        tabs: [
-          Tab(
-            text: "ChatPost",
-            icon: Icon(Icons.chat),
-          ),
-          Tab(
-            text: "Estados",
-            icon: Icon(Icons.tag_faces),
-          ),
-          Tab(
-            text: "Cumpleaños",
-            icon: Icon(Icons.cake),
-          ),
-          Tab(
-            text: "Ajustes",
-            icon: Icon(Icons.settings),
-          ),
-        ],
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key? key, required this.title}) : super(key: key);
+  final String title;
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCounter();
+  }
+
+  //Loading counter value on start
+  void _loadCounter() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _counter = (prefs.getInt('counter') ?? 0);
+    });
+  }
+
+  //Incrementing counter after click
+  void _incrementCounter() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _counter = (prefs.getInt('counter') ?? 0) + 1;
+      prefs.setInt('counter', _counter);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
       ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-  } }
+  }
+}

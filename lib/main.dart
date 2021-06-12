@@ -17,8 +17,27 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+// PONER ICONO A LA APLICACION
+// https://www.it-swarm-es.com/es/flutter/como-cambiar-el-icono-del-iniciador-de-aplicaciones-en-flutter/832241262/
+// https://www.youtube.com/watch?v=RjNAxwcP3Tc
 
 FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+// VARIABLES SESSION
+String logo = 'assets/images/logo.png';
+String logo_texto_blanco = 'assets/images/sendpost-texto-blanco.png';
+var apirest = "http://192.168.0.103:8000";
+
+Future<String> AlmacenarDatos(String key, String value) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  if(key.trim() != "" && value.trim() != "") {
+    prefs.setString(key, value);
+    print('El dato fue almacenado, Gracias.');
+  }
+}
+// FIN VARIABLE SESSION
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,8 +74,6 @@ void errorDialog(context, msg) {
 // Emj : Mantener la sesion iniciada
 // https://es.stackoverflow.com/a/258365
 
-String logo = 'assets/images/logo.png';
-var apirest = "http://192.168.0.105:81";
 
 class MyApp extends StatelessWidget {
   @override
@@ -85,8 +102,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
   @override
   void initState() {
+    // Siempre tengo que inicializar el storage - Login - Importante
+    AlmacenarDatos("", "");
     super.initState();
-
     myController.addListener(_printLatestValue);
     usuario.addListener(_printLatestValue);
     password.addListener(_printLatestValue);
@@ -313,7 +331,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
     );
   }
 
-  Future<Post> fetchData() async {
+  Future<void> fetchData() async {
     //final response = await http.post("http://localhost:8000/login");
 
     var txtuser = usuario.text;
@@ -326,6 +344,13 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
       final data = jsonDecode(response.body);
       if (data['status'] == 'Ok') {
+        // Para guardar datos en session storage - Flutter
+        AlmacenarDatos("idusuario", data['data']['idusuario'].toString());
+        AlmacenarDatos("fb_uid", data['data']['fb_uid'].toString());
+        AlmacenarDatos("logo", logo.toString());
+        AlmacenarDatos("logo_texto_blanco", logo_texto_blanco.toString());
+        AlmacenarDatos("apirest", apirest.toString());
+
         // Actualizar datos de logueo Firebase
         var firebaseUser = FirebaseAuth.instance.currentUser;
         FirebaseFirestore.instance
@@ -339,7 +364,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
             msg: "Bienvenido a SendPost",
             gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 1,
-            backgroundColor: Color(0x0ffc00f8e),
+            backgroundColor: Color(0x0ff333333),
             textColor: Color(0x0ffffffff),
             fontSize: 16.0);
         Navigator.push(
@@ -353,34 +378,6 @@ class _MyCustomFormState extends State<MyCustomForm> {
     } else {
       errorDialog(context, "No debe haber campos vacios");
     }
-  }
-}
-
-class Post {
-  final int id;
-  final String nombres;
-  final String correo;
-  final String usuario;
-  final String clave;
-  final String foto;
-
-  Post(
-      {this.id,
-      this.nombres,
-      this.correo,
-      this.usuario,
-      this.clave,
-      this.foto});
-
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-      id: json['id'],
-      nombres: json['nombres'],
-      correo: json['correo'],
-      usuario: json['usuario'],
-      clave: json['clave'],
-      foto: json['foto'],
-    );
   }
 }
 

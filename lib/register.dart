@@ -411,6 +411,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
           'estado': 'activo',
           'id': data['data']['idUser'],
           'nombre': txtnombres,
+          'descripcion': 'Sin descripción',
           'online': 0,
         });
         // Fin Registro los datos en firebase

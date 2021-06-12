@@ -1,4 +1,5 @@
 // @dart=2.9
+import 'package:sendpost/ajustes.dart';
 import 'package:sendpost/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,11 +18,35 @@ import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'perfil.dart';
 import 'register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+FirebaseFirestore firestore = FirebaseFirestore.instance;
+//Poner en onTap = print(BuscarDatos('nombre_completo').then((value){
+//  print(value);
+//}));
 // Logout Ejm : https://stackoverflow.com/a/63162551
 // EJM TABS BOTTOM: https://stackoverflow.com/a/51825203
 // AppBar Poner imagen : https://stackoverflow.com/a/53857335
-String logo = 'assets/images/sendpost-texto-blanco.png';
+
+
+// STORAGE DATA
+TextEditingController _idMysql = new TextEditingController();
+TextEditingController _idFirebase = new TextEditingController();
+TextEditingController _logo_texto_blanco = new TextEditingController();
+Future<String> getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _idMysql.text = prefs.getString("idusuario").toString() ?? null;
+    _idFirebase.text = prefs.getString("fb_uid").toString() ?? null;
+    _logo_texto_blanco.text = prefs.getString("logo_texto_blanco").toString() ?? null;
+}
+_getSearchData(String key) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String val = prefs.getString(key);
+  return val;
+}
+// END STORAGE DATA
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,9 +54,30 @@ void main() async {
   runApp(Perfil());
 }
 
-FirebaseFirestore firestore = FirebaseFirestore.instance;
-
 class Perfil extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      home: new HomePerfil(),
+    );
+  }
+}
+class HomePerfil extends StatefulWidget {
+  @override
+  HomeScreenState createState() => new HomeScreenState();
+}
+
+class HomeScreenState extends State<HomePerfil> {
+
+  // STORAGE DATA
+  @override
+  void initState(){
+    getUserData();
+    super.initState();
+  }
+  // END STORAGE DATA
+
+//class Perfil extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -45,7 +91,7 @@ class Perfil extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  logo,
+                  _logo_texto_blanco.text.toString(),
                   fit: BoxFit.contain,
                   height: 20,
                 ),
@@ -76,20 +122,35 @@ class Perfil extends StatelessWidget {
                     // FIN ESTO IRA AL PRINCIPIO
                     Card(
                         margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                        child: new ListTile(
+                        child: ListTile(
                           contentPadding: EdgeInsets.fromLTRB(10, 12, 12, 10),
                           leading: IconButton(
                             icon: Icon(Icons.verified_user),
                             onPressed: () => print('select'),
                           ),
-                          title: Text('Configuradión de mis datos'),
+                          title: Text(_idFirebase.text.toString()),
                           subtitle: Text(
                               'Configuración general de tu cuenta de sendpost',
                               style: TextStyle(fontSize: 12)),
                           //trailing: Icon(
                           //  Icons.arrow_forward_ios,
                           //),
-                          onTap: () => print('Precionaste Configuracion'),
+                          onTap: () {
+
+                            print("idFirebase : " + _idFirebase.text);
+                            print("idMysql : " + _idMysql.text);
+                            print("logo : " + _logo_texto_blanco.text);
+
+                            /*Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Ajustes()),
+                            );
+                            BuscarDatos('idusuario').then((val)
+                            {
+                              print("id usuario : " + val);
+                            });
+                             */
+                          },
                         )),
                     Card(
                         margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
