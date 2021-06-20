@@ -1,9 +1,9 @@
 // @dart=2.9
+import 'package:sendpost/SharedPreferences/storage.dart';
 import 'package:sendpost/ajustes.dart';
 import 'package:sendpost/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/services.dart.';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,6 +22,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+// PONER EN TODOS LOS FLUTTER - OBLIGATORIO
+import 'package:sendpost/includes/importante.dart' as variable;
+// FIN PONER EN TODOS LOS FLUTTER
+
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 //Poner en onTap = print(BuscarDatos('nombre_completo').then((value){
 //  print(value);
@@ -30,22 +34,30 @@ FirebaseFirestore firestore = FirebaseFirestore.instance;
 // EJM TABS BOTTOM: https://stackoverflow.com/a/51825203
 // AppBar Poner imagen : https://stackoverflow.com/a/53857335
 
-
 // STORAGE DATA
 TextEditingController _idMysql = new TextEditingController();
 TextEditingController _idFirebase = new TextEditingController();
-TextEditingController _logo_texto_blanco = new TextEditingController();
-Future<String> getUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _idMysql.text = prefs.getString("idusuario").toString() ?? null;
-    _idFirebase.text = prefs.getString("fb_uid").toString() ?? null;
-    _logo_texto_blanco.text = prefs.getString("logo_texto_blanco").toString() ?? null;
+
+Future<String> getidMysql() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  _idMysql.text = await prefs.getString('idusuario');
+  return prefs.getString('idusuario');
 }
-_getSearchData(String key) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String val = prefs.getString(key);
-  return val;
+Future<String> getidFirebase() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  _idFirebase.text = await prefs.getString('fb_uid');
+  return prefs.getString('fb_uid');
 }
+
+/*Future<String> getUserData() async {
+  //final SharedPreferences prefs = await SharedPreferences.getInstance();
+  _idMysql.text = MySharedPreferences.readPrefStr("idusuario") ?? null;
+  _idFirebase.text = MySharedPreferences.readPrefStr("fb_uid") ?? null;
+  cargarSharedPreferences();
+  //prefs.reload();
+}*/
+
+void cargarSharedPreferences() async {}
 // END STORAGE DATA
 
 void main() async {
@@ -62,18 +74,61 @@ class Perfil extends StatelessWidget {
     );
   }
 }
+
 class HomePerfil extends StatefulWidget {
   @override
   HomeScreenState createState() => new HomeScreenState();
 }
 
 class HomeScreenState extends State<HomePerfil> {
-
   // STORAGE DATA
   @override
-  void initState(){
-    getUserData();
+  void initState() {
+    //getUserData();
     super.initState();
+    cargarSharedPreferences();
+    getidMysql().then((valMysql){
+      _idMysql.text = valMysql;
+    });
+    getidFirebase().then((valFB){
+      _idFirebase.text = valFB;
+    });
+
+    // SI EL STORAGE ESTA VACIO VUELVO ATRÁS AL LOGIN
+    if(
+      variable.validarInputs(_idMysql.text) == false ||
+      variable.validarInputs(_idFirebase.text) == false
+    ){
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+
+        Fluttertoast.showToast(
+            msg: "Ups! Hubo un error. Intente de nuevo",
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color(0x0ff333333),
+            textColor: Color(0x0ffffffff),
+            fontSize: 16.0);
+
+        // add your code here.
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MyApp()),
+        );
+        //Navigator.push(
+        //    context,
+        //    new MaterialPageRoute(
+        //        builder: (context) => MyApp()));
+      });
+    }else{
+      // ME LANZARA UN MENSAJE DE BIENVENIDA
+      Fluttertoast.showToast(
+          msg: "Bienvenido a SendPost",
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color(0x0ff333333),
+          textColor: Color(0x0ffffffff),
+          fontSize: 16.0);
+    }
   }
   // END STORAGE DATA
 
@@ -91,7 +146,7 @@ class HomeScreenState extends State<HomePerfil> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  _logo_texto_blanco.text.toString(),
+                  variable.logo_texto_blanco.toString(),
                   fit: BoxFit.contain,
                   height: 20,
                 ),
@@ -128,7 +183,7 @@ class HomeScreenState extends State<HomePerfil> {
                             icon: Icon(Icons.verified_user),
                             onPressed: () => print('select'),
                           ),
-                          title: Text(_idFirebase.text.toString()),
+                          title: Text(_idMysql.text),
                           subtitle: Text(
                               'Configuración general de tu cuenta de sendpost',
                               style: TextStyle(fontSize: 12)),
@@ -139,7 +194,6 @@ class HomeScreenState extends State<HomePerfil> {
 
                             print("idFirebase : " + _idFirebase.text);
                             print("idMysql : " + _idMysql.text);
-                            print("logo : " + _logo_texto_blanco.text);
 
                             /*Navigator.push(
                               context,

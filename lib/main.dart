@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/services.dart.';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:sendpost/SharedPreferences/storage.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:toast/toast.dart';
@@ -19,6 +20,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+// PONER EN TODOS LOS FLUTTER - OBLIGATORIO
+import 'package:sendpost/includes/importante.dart' as variable;
+
 // PONER ICONO A LA APLICACION
 // https://www.it-swarm-es.com/es/flutter/como-cambiar-el-icono-del-iniciador-de-aplicaciones-en-flutter/832241262/
 // https://www.youtube.com/watch?v=RjNAxwcP3Tc
@@ -26,16 +30,19 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 FirebaseFirestore firestore = FirebaseFirestore.instance;
 
 // VARIABLES SESSION
-String logo = 'assets/images/logo.png';
-String logo_texto_blanco = 'assets/images/sendpost-texto-blanco.png';
-var apirest = "http://192.168.0.103:8000";
-
 Future<String> AlmacenarDatos(String key, String value) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if(key.trim() != "" && value.trim() != "") {
     prefs.setString(key, value);
     print('El dato fue almacenado, Gracias.');
   }
+  cargarSharedPreferences();
+  prefs.reload();
+}
+
+void cargarSharedPreferences() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.reload();
 }
 // FIN VARIABLE SESSION
 
@@ -108,6 +115,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
     myController.addListener(_printLatestValue);
     usuario.addListener(_printLatestValue);
     password.addListener(_printLatestValue);
+    cargarSharedPreferences();
   }
 
   @override
@@ -157,7 +165,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 child: Image(
                   width: MediaQuery.of(context).size.width,
                   alignment: Alignment.center, // This is needed
-                  image: AssetImage(logo),
+                  image: AssetImage(variable.logo),
                   height: 100,
                 ),
               ),
@@ -340,18 +348,21 @@ class _MyCustomFormState extends State<MyCustomForm> {
     if (txtuser.trim() != '' && txtpassword.trim() != '') {
       // https://medium.com/@ekosuprastyo15/flutter-json-array-parse-of-objects-dbf36a7aa08d
       var response = await http.get(
-          Uri.parse(apirest + "/login" + "/" + txtuser + "/" + txtpassword));
+          Uri.parse(variable.apirest + "/login" + "/" + txtuser + "/" + txtpassword));
 
       final data = jsonDecode(response.body);
       if (data['status'] == 'Ok') {
         // Para guardar datos en session storage - Flutter
-        AlmacenarDatos("idusuario", data['data']['idusuario'].toString());
-        AlmacenarDatos("fb_uid", data['data']['fb_uid'].toString());
-        AlmacenarDatos("logo", logo.toString());
-        AlmacenarDatos("logo_texto_blanco", logo_texto_blanco.toString());
-        AlmacenarDatos("apirest", apirest.toString());
 
-        // Actualizar datos de logueo Firebase
+        MySharedPreferences.instance.setStringValue("idusuario", data['data']['idusuario'].toString());
+        MySharedPreferences.instance.setStringValue("fb_uid", data['data']['fb_uid'].toString());
+        //AlmacenarDatos("idusuario", data['data']['idusuario'].toString());
+        //AlmacenarDatos("fb_uid", data['data']['fb_uid'].toString());
+
+        print("idusuario : " + data['data']['idusuario'].toString());
+        print("fb_uid : " + data['data']['fb_uid'].toString());
+
+        // Actualizar datos de logueo - Firebase
         var firebaseUser = FirebaseAuth.instance.currentUser;
         FirebaseFirestore.instance
             .collection("usuarios")
@@ -359,14 +370,6 @@ class _MyCustomFormState extends State<MyCustomForm> {
             .set({"online": 1}, SetOptions(merge: true));
 
         // Fin Actualizar datos de logueo Firebase
-
-        Fluttertoast.showToast(
-            msg: "Bienvenido a SendPost",
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color(0x0ff333333),
-            textColor: Color(0x0ffffffff),
-            fontSize: 16.0);
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => Perfil()));
       } else {
